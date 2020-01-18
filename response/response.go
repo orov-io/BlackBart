@@ -207,7 +207,7 @@ func NewError(code int, message string) *Error {
 }
 
 func (e *Error) Error() string {
-	return e.message
+	return fmt.Sprintf("With code: %v -> %s", e.code, e.message)
 }
 
 // Code returns the response error inner code
@@ -236,6 +236,7 @@ func parseError(response *http.Response) (r *Response, err error) {
 }
 
 func parseValid(response *http.Response) (r *Response, err error) {
+	r = new(Response)
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return
