@@ -207,7 +207,7 @@ func NewError(code int, message string) *Error {
 }
 
 func (e *Error) Error() string {
-	return e.message
+	return fmt.Sprintf("With code: %v -> %s", e.code, e.message)
 }
 
 // Code returns the response error inner code
