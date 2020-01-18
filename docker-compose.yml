@@ -23,8 +23,8 @@ services:
       - ./:/$SERVICE_NAME
       - $HOME/go/src:/go/src
       - $HOME/go/pkg:/go/pkg
-      - $HOME/.netrc:/root/.netrc
-      - ${GOOGLE_APPLICATION_CREDENTIALS}:/root/key.json
+      # - $HOME/.netrc:/root/.netrc
+      # - ${GOOGLE_APPLICATION_CREDENTIALS}:/root/key.json
     environment:
       - PORT
       - ENV
