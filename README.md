@@ -7,7 +7,9 @@
 
 This library wraps the [gin](https://github.com/gin-gonic/gin) http router in order to provide an easy way to enable some tools for develop API servers. In the future, gin will be removed to provide a framework agnostic wrapper.
 
-Also, this library is called [BlackBart](https://en.wikipedia.org/wiki/Bartholomew_Roberts) by the famous pirate, in order to increase the pirate popularity to [fight against globar warming](https://pastafarians.org.au/pastafarianism/pirates-and-global-warming/)
+Also, a great GCLOUD integration is provided.
+
+__Freak alert__ this library is called [BlackBart](https://en.wikipedia.org/wiki/Bartholomew_Roberts) by the famous pirate, in order to increase the pirate popularity to [fight against globar warming](https://pastafarians.org.au/pastafarianism/pirates-and-global-warming/)
 
 ## Importing
 
@@ -131,6 +133,19 @@ Below, there are a list with env variables that each module is waiting for:
 
 * FIREBASE_BUCKET and FIREBASE_BUCKET_FILE_NAME: Use this two variables to provide to the service a GCLOUD bucket to search for the firebase json credential. By default, service assumes that file is called firebase.json. If you are not in an app engine context in the same gcloud project, you will need to set the GOOGLE_APPLICATION_CREDENTIALS variable to the json file that stores your google IAM with permissions to read in the provided bucket.
 * FIREBASE_CONFIG_PATH: You also can provide the firebase json credential as a local file. Use this variable to says to the service where the file is allocated.
+
+#### Profiler
+
+By default, _BlackBart_ try to start the GCLOUD profiler, but it not panic if it was not possible.
+
+#### Local key/value database
+
+_BlackBart_ provides a local key/value database. It uses [badger](https://github.com/dgraph-io/badger). To initialize it, you have 2 ways:
+
+* Set ENABLE_BADGER env variable to true. _BlackBart_ will provide you with a in-memory badger database with badger default options.
+* Set a new InternalDBOptions Option with your badger options. See the InternalDBOptions in _[server options](./server/options.go)_.
+
+If badger is enabled, you can get it with the `server.GetInternalDB()`function.
 
 ### Using options to configure the service
 

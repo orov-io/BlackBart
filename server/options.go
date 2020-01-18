@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"os"
+	"strconv"
 
+	badger "github.com/dgraph-io/badger/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
@@ -12,15 +14,17 @@ import (
 )
 
 const envKey = "ENV"
+const badgerFlagKey = "ENABLE_BADGER"
 
 // Options store all service configuration options
 type Options struct {
-	db       *DBOptions
-	redis    *RedisOptions
-	logger   *LoggerOptions
-	firebase *FirebaseOptions
-	gin      *GinOptions
-	service  *ServiceOptions
+	db         *DBOptions
+	redis      *RedisOptions
+	logger     *LoggerOptions
+	firebase   *FirebaseOptions
+	gin        *GinOptions
+	service    *ServiceOptions
+	internalDB *InternalDBOptions
 
 	Context context.Context
 }
@@ -61,6 +65,11 @@ func (o *Options) Service(serviceOptions *ServiceOptions) {
 	o.service = serviceOptions
 }
 
+// InternalDB sets the service options configuration
+func (o *Options) InternalDB(internalDBOptions *InternalDBOptions) {
+	o.internalDB = internalDBOptions
+}
+
 // WithDefaultOptions attach default configuration to the options struct and returns
 // a pointer with the default configuration options.
 func (o *Options) WithDefaultOptions() *Options {
@@ -71,6 +80,7 @@ func (o *Options) WithDefaultOptions() *Options {
 	o.Gin(DefaultGinOptions())
 	o.Firebase(DefaultFirebaseOptions())
 	o.Service(DefaultServiceOptions())
+	o.InternalDB(DefaultInternalDBOptions())
 
 	return o
 }
@@ -317,5 +327,24 @@ func DefaultServiceOptions() *ServiceOptions {
 		Version:  GetEnvOrDefaultString(serviceVersionKey),
 		Path:     GetEnvOrDefaultString(servicePathKey),
 		Profiler: profiler,
+	}
+}
+
+// InternalDBOptions stores options to badger, the provided internal database.
+type InternalDBOptions struct {
+	BadgerOptions badger.Options
+	enabled       bool
+}
+
+// DefaultInternalDBOptions returns a InternalDBOptions fills with Name and version
+// founds on the  env variables.
+func DefaultInternalDBOptions() *InternalDBOptions {
+	// Don't care about error. If is not nil, we want to set enable to false.
+	enable, _ := strconv.ParseBool(os.Getenv(badgerFlagKey))
+	opt := badger.DefaultOptions("").WithInMemory(true)
+
+	return &InternalDBOptions{
+		BadgerOptions: opt,
+		enabled:       enable,
 	}
 }

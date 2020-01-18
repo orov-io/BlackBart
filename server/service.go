@@ -9,6 +9,7 @@ import (
 	"cloud.google.com/go/profiler"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	badger "github.com/dgraph-io/badger/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
@@ -26,6 +27,7 @@ const (
 
 var onceService sync.Once
 var onceDB sync.Once
+var onceInternalDB sync.Once
 var onceRedis sync.Once
 var instance *Service
 
@@ -38,6 +40,7 @@ type Service struct {
 	service   *gin.Engine
 	log       *logrus.Logger
 	firebase  *firebase.App
+	badger    *badger.DB
 }
 
 // Init initializes a service if there are no other service initialized
@@ -106,6 +109,14 @@ func (s *Service) init() error {
 
 	s.initProfiler()
 
+	err = s.initInternalDB()
+	GetLogger().Debug("Initializing badger")
+	if err != nil && !IsNoInternalDatabaseOptionsError(err) {
+		GetLogger().WithError(err).Fatal("Can't initialize the internal DB")
+	} else if IsNoInternalDatabaseOptionsError(err) {
+		GetLogger().Debug("InternalDB not required. Skipping badger initialization")
+	}
+
 	return nil
 }
 
@@ -169,6 +180,15 @@ func (s *Service) GetDBx() (*sqlx.DB, error) {
 // IsUsingDB returns if the service has a functional database.
 func (s *Service) IsUsingDB() bool {
 	return s.db != nil
+}
+
+// GetInternalDB returns the badger database
+func (s *Service) GetInternalDB() (*badger.DB, error) {
+	if s.badger == nil {
+		return nil, NewInternalDBNotYetInitializeError()
+	}
+
+	return s.badger, nil
 }
 
 // GetAuthClient returns a instance of the attached auth client
