@@ -263,3 +263,26 @@ func (s *Service) SetMode(mode string) {
 func (s *Service) Group(relativePath string, handlers ...gin.HandlerFunc) *gin.RouterGroup {
 	return s.service.Group(relativePath, handlers...)
 }
+
+// CloseAll closes all opened database connections
+func (s *Service) CloseAll() error {
+	if s.dbx != nil {
+		if err := s.dbx.Close(); err != nil {
+			return err
+		}
+	}
+
+	if s.redisPool != nil {
+		if err := s.redisPool.Close(); err != nil {
+			return err
+		}
+	}
+
+	if s.badger != nil {
+		if err := s.db.Close(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
