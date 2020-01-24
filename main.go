@@ -43,7 +43,7 @@ func addRoutes(service *server.Service) {
 }
 
 func addPong(service *server.Service) {
-	pingGroup := service.Group("/v1/gin/ping")
+	pingGroup := service.Group("/v1/blackbart/ping")
 	{
 		pingGroup.GET("", pong)
 		pingGroup.POST("", pong)

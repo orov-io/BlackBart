@@ -74,9 +74,6 @@ func (r *Response) addError(errors ...error) {
 			).Warningf("SERVER ERROR")
 			err = NewHiddenError(traceID)
 		}
-		fmt.Printf("r.Errors: %v\n", r.Errors)
-		fmt.Printf("err: %v\n", err)
-		fmt.Printf("err.Error(): %v\n", err.Error())
 		r.Errors = append(r.Errors, err.Error())
 	}
 }
@@ -96,6 +93,11 @@ func (r *Response) forbidden() {
 
 func (r *Response) badRequest() {
 	r.ctx.JSON(http.StatusBadRequest, r)
+	r.ctx.Abort()
+}
+
+func (r *Response) notFound() {
+	r.ctx.String(http.StatusNotFound, "404 page not found")
 	r.ctx.Abort()
 }
 
@@ -123,6 +125,12 @@ func SendBadRequest(c *gin.Context, errors ...error) {
 	r := newResponse(c)
 	r.addError(errors...)
 	r.badRequest()
+}
+
+// SendNotFoundRequest returns a 404 code with standard message in body
+func SendNotFoundRequest(c *gin.Context) {
+	r := newResponse(c)
+	r.notFound()
 }
 
 // SendInternalError send a standard 500 response
